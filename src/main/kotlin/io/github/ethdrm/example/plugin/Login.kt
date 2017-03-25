@@ -2,6 +2,9 @@ package io.github.ethdrm.example.plugin
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ApplicationComponent
+import com.intellij.openapi.components.ProjectComponent
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.DialogWrapper.OK_EXIT_CODE
 import com.intellij.openapi.ui.ValidationInfo
@@ -9,24 +12,27 @@ import com.intellij.ui.layout.CCFlags
 import com.intellij.ui.layout.panel
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.WalletUtils
+import java.io.File
 import javax.swing.JPanel
 import javax.swing.JPasswordField
 import javax.swing.JTextField
 
 const val LOGIN_COMPONENT_NAME = "login_component"
-const val LOGIN_DIALOG_TITLE = "Licence check"
-const val PASSWORD = "Password:"
-const val USERNAME = "Username:"
+const val LOGIN_DIALOG_TITLE = "License validation"
 
-class LoginComponent : ApplicationComponent {
-    override fun disposeComponent() {
-    }
+class LoginComponent(val project: Project) : ProjectComponent {
+    override fun disposeComponent() {}
 
-    override fun initComponent() {
-        val dialog = LoginDialog()
+    override fun initComponent() {}
+
+    override fun projectClosed() {}
+
+    override fun projectOpened() {
+        val dialog = LoginDialog(project)
         dialog.show()
+
         if (dialog.exitCode == OK_EXIT_CODE) {
-            ApplicationManager.getApplication().executeOnPooledThread { LicenceCheck(dialog.credentials, null) }
+            ProgressManager.getInstance().run(LicenseTask(project, dialog.walletInfo))
         }
     }
 
@@ -34,12 +40,11 @@ class LoginComponent : ApplicationComponent {
 }
 
 
-class LoginDialog : DialogWrapper(null) {
+class LoginDialog(project: Project) : DialogWrapper(project) {
     private val usernameField = JTextField()
     private val passwordField = JPasswordField()
 
-    val credentials : EthCredentials
-        get() = EthCredentials(usernameField.text, String(passwordField.password))
+    val walletInfo by lazy { WalletInfo(usernameField.text, String(passwordField.password)) }
 
     init {
         init()
@@ -52,8 +57,23 @@ class LoginDialog : DialogWrapper(null) {
     }
 
     override fun doValidate() = when {
-        credentials.username.isEmpty() -> ValidationInfo("Username field shouldn't be empty", usernameField)
-        credentials.password.isEmpty() -> ValidationInfo("Password field should't be empty", passwordField)
+        walletInfo.title.isEmpty() -> ValidationInfo("Username field shouldn't be empty", usernameField)
+        walletInfo.password.isEmpty() -> ValidationInfo("Password field should't be empty", passwordField)
         else -> null
+    }
+
+    companion object {
+        const val PASSWORD = "Password:"
+        const val USERNAME = "Username:"
+    }
+}
+
+
+class WalletInfo(val title: String, val password: String) {
+    val file = File("${System.getProperty(USER_HOME)}/$DRM_DIR/$title")
+
+    companion object {
+        const val USER_HOME = "user.home"
+        const val DRM_DIR = ".ethdrm"
     }
 }
