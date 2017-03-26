@@ -1,5 +1,9 @@
 package io.github.ethdrm.example.plugin
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
+import com.intellij.openapi.actionSystem.PopupAction
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
@@ -42,8 +46,14 @@ class LicenseTask(project: Project, val walletInfo: WalletInfo) :
 
     override fun onSuccess() {
         super.onSuccess()
-        Messages.showMessageDialog(project, "User has license : $result",
-                LICENSE_TASK_TITLE, Messages.getInformationIcon())
+        if (!result) {
+            Messages.showErrorDialog(project, "Sorry, but you don't have the license. Visit our site to buy one",
+                    "License validation error")
+            ProjectManager.getInstance().reloadProject(project)
+        } else {
+            Notifications.Bus.notify(Notification(LICENSE_TASK_TITLE, LICENSE_TASK_TITLE,
+                    "License validation success", NotificationType.INFORMATION))
+        }
     }
 
     override fun onThrowable(error: Throwable) {

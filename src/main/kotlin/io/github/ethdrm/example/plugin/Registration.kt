@@ -24,4 +24,10 @@ class RegisterTask(project: Project, val walletInfo: WalletInfo) :
                 "Wallet created")
         ProjectManager.getInstance().reloadProject(project)
     }
+
+    override fun onThrowable(error: Throwable) {
+        Messages.showErrorDialog(project,
+                "Error occurred: ${error.message}. Visit our site for following instructions", "Error")
+        ProjectManager.getInstance().reloadProject(project)
+    }
 }

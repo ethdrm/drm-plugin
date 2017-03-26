@@ -50,8 +50,8 @@ class LoginComponent(val project: Project) : ProjectComponent {
 
 
 class LoginDialog(project: Project) : DialogWrapper(project) {
-    private val usernameField = JTextField()
-    private val passwordField = JPasswordField()
+    private val usernameField = JTextField(DEFAULT_COLUMN_WIDTH)
+    private val passwordField = JPasswordField(DEFAULT_COLUMN_WIDTH)
 
     val walletInfo: WalletInfo
         get() = WalletInfo(usernameField.text, String(passwordField.password))
@@ -78,8 +78,9 @@ class LoginDialog(project: Project) : DialogWrapper(project) {
     override fun shouldCloseOnCross() = false
 
     companion object {
-        const val SIGN_IN_CODE = 0
-        const val REGISTER_CODE = 1
+        const val DEFAULT_COLUMN_WIDTH = 20
+        const val SIGN_IN_CODE = 100
+        const val REGISTER_CODE = 200
         const val SIGN_IN = "Sign In"
         const val REGISTER = "Register"
         const val PASSWORD = "Password:"

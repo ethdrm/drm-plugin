@@ -10,7 +10,11 @@ Plugin for IntelliJ IDEA. Showcase for ethdrm smart contract.
 Simply run 'gradle runIde' in project directory.
 
 ## Screenshots
-TODO  
+<img src="screenshots/drm_1.png"/>
+<img src="screenshots/drm_2.png"/>
+<img src="screenshots/drm_3.png"/>
+<img src="screenshots/drm_4.png"/>
+<img src="screenshots/drm_5.png"/>
 
 ## Known issues  
 
