@@ -3,6 +3,7 @@ package io.github.ethdrm.example.plugin
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.Messages
 import io.guthub.ethdrm.example.plugin.contract.Drm
 import org.web3j.abi.datatypes.Address
@@ -43,6 +44,11 @@ class LicenseTask(project: Project, val walletInfo: WalletInfo) :
         super.onSuccess()
         Messages.showMessageDialog(project, "User has license : $result",
                 LICENSE_TASK_TITLE, Messages.getInformationIcon())
+    }
+
+    override fun onThrowable(error: Throwable) {
+        Messages.showErrorDialog(project, "Error occured: ${error.message}", "License validation error")
+        ProjectManager.getInstance().reloadProject(project)
     }
 
     companion object {
