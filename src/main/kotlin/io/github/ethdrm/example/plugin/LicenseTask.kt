@@ -17,9 +17,16 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 
-const val LICENSE_TASK_TITLE = "License validation"
+abstract class LicenseTask(project: Project) : Task.Backgroundable(project, LICENSE_TASK_TITLE) {
+    override fun onThrowable(error: Throwable) = project.showError(LICENSE_TASK_TITLE, error.message)
 
-class RegisterTask(project: Project, val walletInfo: WalletInfo) : Task.Backgroundable(project, LICENSE_TASK_TITLE) {
+    companion object {
+        const val LICENSE_TASK_TITLE = "License validation"
+    }
+}
+
+
+class RegisterTask(project: Project, val walletInfo: WalletInfo) : LicenseTask(project) {
 
     private var address: String? = null
 
@@ -31,12 +38,10 @@ class RegisterTask(project: Project, val walletInfo: WalletInfo) : Task.Backgrou
 
     override fun onSuccess() =
             project.showInfo(LICENSE_TASK_TITLE, "Wallet created at ${walletInfo.file}. Your address: $address")
-
-    override fun onThrowable(error: Throwable) = project.showError(LICENSE_TASK_TITLE, error.message)
 }
 
 
-class SignInTask(project: Project, val walletInfo: WalletInfo) : Task.Backgroundable(project, LICENSE_TASK_TITLE) {
+class SignInTask(project: Project, val walletInfo: WalletInfo) : LicenseTask(project) {
 
     private var hasLicense = false
 
